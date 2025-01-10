@@ -1,0 +1,8 @@
+version: 0.0
+os: linux
+
+files:
+  - source: upload.html
+    destination: /var/www/html/
+  - source: success.html
+    destination: /var/www/html/
