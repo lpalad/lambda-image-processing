@@ -4,29 +4,30 @@ phases:
   install:
     commands:
       - echo "Installing dependencies..."
+      # Upgrade pip
       - pip install --upgrade pip
+      # Install Pillow and boto3 into the current directory
       - pip install pillow -t .
       - pip install boto3 -t .
-  
+      # (Optional) If you need cryptography or other native libs, add them here:
+      # - pip install cryptography -t .
+
   build:
     commands:
-      # Lambda deployment
+      # 1. Package and update the Lambda function
       - echo "Zipping and deploying Lambda code..."
       - zip -r function.zip lambda_function.py
-      - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip --region ap-southeast-2
-      
-      # Web files deployment to EC2 using SSM
-      - echo "Deploying web files..."
-      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/
-      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/
-      - aws ssm send-command \
-          --instance-ids "i-0bb698509891c6cb1" \
-          --document-name "AWS-RunShellScript" \
-          --parameters 'commands=["sudo aws s3 cp s3://s3-lambda-1735992190/web/upload.html /var/www/html/","sudo aws s3 cp s3://s3-lambda-1735992190/web/success.html /var/www/html/"]' \
+      - aws lambda update-function-code \
+          --function-name ProcessImageFunction \
+          --zip-file fileb://function.zip \
           --region ap-southeast-2
+
+      # 2. Deploy web files to S3
+      - echo "Deploying web files to S3..."
+      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/upload.html
+      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/success.html
 
 artifacts:
   files:
     - function.zip
     - web/*
-  discard-paths: no
