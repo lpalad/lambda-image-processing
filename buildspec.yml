@@ -4,30 +4,30 @@ phases:
   install:
     commands:
       - echo "Installing dependencies..."
-      # Upgrade pip
       - pip install --upgrade pip
-      # Install Pillow and boto3 into the current directory
       - pip install pillow -t .
       - pip install boto3 -t .
-      # (Optional) If you need cryptography or other native libs, add them here:
-      # - pip install cryptography -t .
-
+  
   build:
     commands:
-      # 1. Package and update the Lambda function
+      # Lambda deployment
       - echo "Zipping and deploying Lambda code..."
       - zip -r function.zip lambda_function.py
-      - aws lambda update-function-code \
-          --function-name ProcessImageFunction \
-          --zip-file fileb://function.zip \
-          --region ap-southeast-2
-
-      # 2. Deploy web files to S3
-      - echo "Deploying web files to S3..."
-      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/upload.html
-      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/success.html
+      - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip --region ap-southeast-2
+      
+      # Web files deployment
+      - echo "Deploying web files..."
+      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/
+      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/
+      
+      # Deploy to EC2 using CodeDeploy
+      - aws deploy create-deployment \
+          --application-name YourCodeDeployApp \
+          --deployment-group-name YourDeploymentGroup \
+          --revision revisionType=S3,s3Location={bucket=s3-lambda-1735992190,key=web/,bundleType=zip}
 
 artifacts:
   files:
     - function.zip
     - web/*
+  discard-paths: no
