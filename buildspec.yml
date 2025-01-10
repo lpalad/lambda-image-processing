@@ -1,0 +1,20 @@
+cat << 'EOF' > buildspec.yml
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies if needed..."
+      - pip install --upgrade pip
+      # If you need Pillow or other libs for your Lambda:
+      - pip install pillow -t .
+  build:
+    commands:
+      - echo "Zipping the source code..."
+      - zip -r function.zip .
+      - echo "Updating Lambda code..."
+      - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip
+artifacts:
+  files:
+    - function.zip
+EOF
