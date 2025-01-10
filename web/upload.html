@@ -22,9 +22,9 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        .file-list {
-            text-align: left;
-            margin: 20px 0;
+        .file-info {
+            margin-top: 5px;
+            font-style: italic;
         }
         #uploadStatus {
             margin-top: 20px;
@@ -34,49 +34,107 @@
 <body>
     <div class="upload-container">
         <h1>Upload Images</h1>
-        <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.gif">
-        <div id="fileList" class="file-list"></div>
-        <button onclick="uploadFiles()" class="upload-button">Upload All Files</button>
+
+        <!-- First File Input + Upload Button -->
+        <div>
+            <input type="file" id="fileInput1" accept=".jpg,.jpeg,.png,.gif">
+            <div id="fileInfo1" class="file-info"></div>
+            <button onclick="uploadFile1()" class="upload-button">Upload File 1</button>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- Second File Input + Upload Button -->
+        <div>
+            <input type="file" id="fileInput2" accept=".jpg,.jpeg,.png,.gif">
+            <div id="fileInfo2" class="file-info"></div>
+            <button onclick="uploadFile2()" class="upload-button">Upload File 2</button>
+        </div>
+
+        <!-- Overall Status / Confirmation -->
         <div id="uploadStatus"></div>
     </div>
 
     <script>
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            for(let file of this.files) {
-                fileList.innerHTML += `<div>${file.name}</div>`;
+        // Display chosen file name for the first input
+        document.getElementById('fileInput1').addEventListener('change', function() {
+            const fileInfo1 = document.getElementById('fileInfo1');
+            if (this.files.length > 0) {
+                fileInfo1.innerHTML = `Selected file: ${this.files[0].name}`;
+            } else {
+                fileInfo1.innerHTML = '';
             }
         });
 
-        async function uploadFiles() {
-            const files = document.getElementById('fileInput').files;
-            const statusDiv = document.getElementById('uploadStatus');
-            const totalFiles = files.length;
-            let successCount = 0;
+        // Display chosen file name for the second input
+        document.getElementById('fileInput2').addEventListener('change', function() {
+            const fileInfo2 = document.getElementById('fileInfo2');
+            if (this.files.length > 0) {
+                fileInfo2.innerHTML = `Selected file: ${this.files[0].name}`;
+            } else {
+                fileInfo2.innerHTML = '';
+            }
+        });
 
-            for(let file of files) {
-                try {
-                    const formData = new FormData();
-                    formData.append('key', `uploads/${Date.now()}-${file.name}`);
-                    formData.append('file', file);
-
-                    const response = await fetch('https://s3-lambda-1735992190.s3.amazonaws.com/', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if(response.ok) {
-                        successCount++;
-                        statusDiv.innerHTML = `Uploaded ${successCount} of ${totalFiles} files...`;
-                    }
-                } catch(error) {
-                    console.error(`Error uploading ${file.name}:`, error);
-                }
+        // Upload File 1 to S3
+        async function uploadFile1() {
+            const fileInput = document.getElementById('fileInput1');
+            if (fileInput.files.length === 0) {
+                alert('Please choose a file for File 1 first.');
+                return;
             }
 
-            if(successCount === totalFiles) {
-                window.location.href = '/success.html';
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('key', `uploads/${Date.now()}-${file.name}`);
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('https://s3-lambda-1735992190.s3.amazonaws.com/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('uploadStatus').innerHTML = `File 1 uploaded successfully!`;
+                    // If you want to redirect or handle success differently, do it here
+                } else {
+                    document.getElementById('uploadStatus').innerHTML = `Failed to upload File 1.`;
+                }
+            } catch (error) {
+                console.error('Error uploading File 1:', error);
+                document.getElementById('uploadStatus').innerHTML = `Error uploading File 1.`;
+            }
+        }
+
+        // Upload File 2 to S3
+        async function uploadFile2() {
+            const fileInput = document.getElementById('fileInput2');
+            if (fileInput.files.length === 0) {
+                alert('Please choose a file for File 2 first.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('key', `uploads/${Date.now()}-${file.name}`);
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('https://s3-lambda-1735992190.s3.amazonaws.com/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('uploadStatus').innerHTML = `File 2 uploaded successfully!`;
+                    // If you want to redirect or handle success differently, do it here
+                } else {
+                    document.getElementById('uploadStatus').innerHTML = `Failed to upload File 2.`;
+                }
+            } catch (error) {
+                console.error('Error uploading File 2:', error);
+                document.getElementById('uploadStatus').innerHTML = `Error uploading File 2.`;
             }
         }
     </script>
