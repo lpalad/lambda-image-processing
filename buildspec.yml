@@ -1,20 +1,31 @@
-cat << 'EOF' > buildspec.yml
 version: 0.2
 
 phases:
   install:
     commands:
-      - echo "Installing dependencies if needed..."
+      - echo "Installing dependencies..."
       - pip install --upgrade pip
-      # If you need Pillow or other libs for your Lambda:
       - pip install pillow -t .
+      - pip install boto3 -t .
+  
   build:
     commands:
-      - echo "Zipping the source code..."
+      # Lambda deployment
+      - echo "Zipping and deploying Lambda code..."
       - zip -r function.zip .
-      - echo "Updating Lambda code..."
-      - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip
+      - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip --region ap-southeast-2
+      
+      # Web files deployment
+      - echo "Deploying web files..."
+      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/
+      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/
+
+  post_build:
+    commands:
+      - echo "Deployment completed on `date`"
+
 artifacts:
   files:
     - function.zip
-EOF
+    - web/*
+  discard-paths: no
