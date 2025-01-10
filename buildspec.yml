@@ -15,13 +15,15 @@ phases:
       - zip -r function.zip lambda_function.py
       - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip --region ap-southeast-2
       
-      # Web files deployment to EC2
-      - echo "Deploying web files to EC2..."
+      # Web files deployment to EC2 using SSM
+      - echo "Deploying web files..."
+      - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/
+      - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/
       - aws ssm send-command \
-          --targets Key=tag:Name,Values=YourEC2Name \
+          --instance-ids "i-0bb698509891c6cb1" \
           --document-name "AWS-RunShellScript" \
-          --parameters commands=["sudo aws s3 cp s3://s3-lambda-1735992190/web/upload.html /var/www/html/",
-                               "sudo aws s3 cp s3://s3-lambda-1735992190/web/success.html /var/www/html/"]
+          --parameters 'commands=["sudo aws s3 cp s3://s3-lambda-1735992190/web/upload.html /var/www/html/","sudo aws s3 cp s3://s3-lambda-1735992190/web/success.html /var/www/html/"]' \
+          --region ap-southeast-2
 
 artifacts:
   files:
