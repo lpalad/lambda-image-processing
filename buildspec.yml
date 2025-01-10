@@ -12,17 +12,13 @@ phases:
     commands:
       # Lambda deployment
       - echo "Zipping and deploying Lambda code..."
-      - zip -r function.zip .
+      - zip -r function.zip lambda_function.py
       - aws lambda update-function-code --function-name ProcessImageFunction --zip-file fileb://function.zip --region ap-southeast-2
       
       # Web files deployment
       - echo "Deploying web files..."
       - aws s3 cp web/upload.html s3://s3-lambda-1735992190/web/
       - aws s3 cp web/success.html s3://s3-lambda-1735992190/web/
-
-  post_build:
-    commands:
-      - echo "Deployment completed on `date`"
 
 artifacts:
   files:
