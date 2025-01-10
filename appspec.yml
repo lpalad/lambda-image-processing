@@ -6,3 +6,15 @@ files:
     destination: /var/www/html
   - source: web/success.html
     destination: /var/www/html
+
+# Are there hooks referencing "upload.html" at top level?
+hooks:
+  BeforeInstall:
+    - location: scripts/before.sh
+      runas: ec2-user
+  Install:
+    - location: scripts/install.sh
+      runas: ec2-user
+  AfterInstall:
+    - location: scripts/after.sh
+      runas: ec2-user
