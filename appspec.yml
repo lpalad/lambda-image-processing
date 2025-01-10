@@ -3,6 +3,6 @@ os: linux
 
 files:
   - source: web/upload.html
-    destination: /var/www/html/
+    destination: /var/www/html
   - source: web/success.html
-    destination: /var/www/html/
+    destination: /var/www/html
